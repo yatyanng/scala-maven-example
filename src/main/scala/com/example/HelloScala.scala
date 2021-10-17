@@ -1,5 +1,8 @@
 package com.example
 
 object HelloScala extends App {
-  println(new Greeter().greet("Scala-Maven"))
+  if (args.size == 0)
+    new Greeter().greet("Scala-Maven-Shade")
+  else
+    new Greeter().greet(args(0))
 }
