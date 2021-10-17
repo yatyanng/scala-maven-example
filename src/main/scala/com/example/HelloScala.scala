@@ -1,21 +1,24 @@
 package com.example
 
 case class Plugin(firstname: String, surname: String)
+case class Developer(firstname: String, surname: String)
 
-object HelloScala extends App {
-
+trait Schedule[T] {
   // notice the equal sign after the 2nd Unit
-  protected def runEveryMillis(callback: () => Unit, delay: Int): Unit = {
-    while (true) { callback(); Thread sleep delay }
+  protected def runEveryMillis(callback: (T) => Unit, x: T, delay: Int): Unit = {
+    while (true) { callback(x); Thread sleep delay }
   }
+}
 
-  override def toString() = Plugin("Scala", "Greeter").copy(surname = "Maven").toString()
+object HelloScala extends App with Schedule[Plugin] {
 
-  runEveryMillis(() => {
-    if (args.size == 0) {
-      new Greeter().greet("Developer", this)
+  private val plugin = Plugin("Scala", "Greeter").copy(surname = "Maven")
+
+  runEveryMillis((p) => {
+    if (args.size < 2) {
+      new Greeter().greet(Developer("Mr", "X"), p)
     } else {
-      new Greeter().greet(args(0), this)
+      new Greeter().greet(Developer(args(0), args(1)), p)
     }
-  }, 1000)
+  }, plugin, 1000)
 }
