@@ -3,22 +3,20 @@ package com.example
 case class Plugin(firstname: String, surname: String)
 case class Developer(firstname: String, surname: String)
 
-trait Schedule[T] {
+trait Schedule[Callee, Caller] {
   // notice the equal sign after the 2nd Unit
-  protected def runEveryMillis(callback: (T) => Unit, x: T, delay: Int): Unit = {
-    while (true) { callback(x); Thread sleep delay }
+  protected def runEveryMillis(callback: (Callee, Caller) => Unit, d: Callee, p: Caller,
+                               delay: Int): Unit = {
+    while (true) { callback(d, p); Thread sleep delay }
   }
 }
 
-object HelloScala extends App with Schedule[Plugin] {
+object HelloScala extends App with Schedule[Developer, Plugin] {
 
-  private val plugin = Plugin("Scala", "Greeter").copy(surname = "Maven")
-
-  runEveryMillis((p) => {
-    if (args.size < 2) {
-      new Greeter().greet(Developer("Mr", "X"), p)
-    } else {
-      new Greeter().greet(Developer(args(0), args(1)), p)
-    }
-  }, plugin, 1000)
+  val plugin = Plugin("Scala", "Greeter").copy(surname = "Maven")
+  var developer = Developer("Mr", "X")
+  if (args.size >= 2) {
+    developer = Developer(args(0), args(1))
+  }
+  runEveryMillis((d, p) => Greeter.greet(d, p), developer, plugin, 1000)
 }
