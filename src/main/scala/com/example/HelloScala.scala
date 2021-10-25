@@ -18,5 +18,5 @@ object HelloScala extends App with Schedule[Developer, Plugin] {
   if (args.size >= 2) {
     developer = Developer(args(0), args(1))
   }
-  runEveryMillis((d, p) => Greeter.greet(d, p), developer, plugin, 1000)
+  runEveryMillis((d, p) => Greeter.greet(d.toString(), p.toString()), developer, plugin, 1000)
 }

@@ -26,6 +26,22 @@
 
 	<build>
 		<plugins>
+			<!-- Use scala-maven-plugin for Scala support -->
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>3.2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<!-- Need to specify this explicitly, otherwise plugin won't be called 
+								when doing e.g. mvn compile -->
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Configure maven-compiler-plugin to use the desired Java version -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -67,23 +83,6 @@
 								<source>src/test/scala</source>
 							</sources>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- Use scala-maven-plugin for Scala support -->
-			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.2.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<!-- Need to specify this explicitly, otherwise plugin won't be called 
-								when doing e.g. mvn compile -->
-							<goal>compile</goal>
-							<goal>testCompile</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>
