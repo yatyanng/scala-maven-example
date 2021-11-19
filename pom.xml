@@ -5,22 +5,46 @@
 
 	<groupId>com.example</groupId>
 	<artifactId>scala-maven-example</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.2</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+		<apache.spark.version>3.2.0</apache.spark.version>
 		<java.version>1.8</java.version>
-		<scala.version>2.12.6</scala.version>
+		<scala.version>2.12.15</scala.version>
 	</properties>
 
 	<dependencies>
-		<!-- scala-maven-plugin determines the Scala version to use from this dependency -->
+		<dependency>
+			<groupId>org.lz4</groupId>
+			<artifactId>lz4-java</artifactId>
+			<version>1.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.htrace</groupId>
+			<artifactId>htrace-core4</artifactId>
+			<version>4.2.0-incubating</version>
+		</dependency>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
 			<version>${scala.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_2.12</artifactId>
+			<version>${apache.spark.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_2.12</artifactId>
+			<version>${apache.spark.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-catalyst_2.12</artifactId>
+			<version>${apache.spark.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -30,7 +54,7 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.2.2</version>
+				<version>4.5.4</version>
 				<executions>
 					<execution>
 						<goals>
@@ -40,13 +64,28 @@
 							<goal>testCompile</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>scala-compile-first</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>add-source</goal>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>scala-test-compile</id>
+						<phase>process-test-resources</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 			<!-- Configure maven-compiler-plugin to use the desired Java version -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.8.1</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
@@ -91,11 +130,49 @@
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.2.4</version>
 				<configuration>
+					<minimizeJar>true</minimizeJar>
+					<filters>
+						<filter>
+							<artifact>org.apache.spark:spark-catalyst_2.12</artifact>
+							<includes>
+								<include>org/apache/spark/sql/**</include>
+							</includes>
+						</filter>
+						<filter>
+							<artifact>org.lz4:lz4-java</artifact>
+							<includes>
+								<include>net/jpountz/**</include>
+							</includes>
+						</filter>
+						<filter>
+							<artifact>org.scala-lang:scala-library</artifact>
+							<includes>
+								<include>scala/**</include>
+							</includes>
+						</filter>
+						<filter>
+							<artifact>org.apache.htrace:htrace-core4</artifact>
+							<includes>
+								<include>org/apache/htrace/shaded/commons/logging/impl/**</include>
+								<include>org/apache/htrace/shaded/commons/logging/**</include>
+								<include>org/apache/htrace/shaded/fasterxml/jackson/**</include>
+								<include>org/apache/htrace/core/**</include>
+							</includes>
+						</filter>
+						<filter>
+							<artifact>*:*</artifact>
+							<excludes>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+							</excludes>
+						</filter>
+					</filters>
 					<transformers>
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 							<manifestEntries>
-								<Main-Class>com.example.HelloScala</Main-Class>
+								<Main-Class>com.example.Main</Main-Class>
 							</manifestEntries>
 						</transformer>
 					</transformers>
@@ -111,11 +188,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<repositories>
-		<repository>
-			<id>vidconnect-maven-central-proxy</id>
-			<name>vidconnect-maven-central-proxy</name>
-			<url>https://vidconnect.cyou:7443/repository/maven-central/</url>
-		</repository>
-	</repositories>
 </project>
